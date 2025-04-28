@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Review-dish</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #fff8f0;
+      padding: 20px;
+      
+      margin: auto;
+    }
+    header {
+      background-image: url('https://www.travelzeed.com/content/wp-content/uploads/2023/10/AnyConv.com__Article-48-1200x628.webp');
+      background-size: cover;
+      background-position: center;
+      height: 250px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    header h1 {
+      color: white;
+      background-color: rgba(0,0,0,0.5);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 2em;
+    }
+    h1, h2 {
+      color: #d35400;
+    }
+    
+    
+    .review img {
+      max-width: 100%;
+      margin-top: 10px;
+    }
+    .review button {
+      margin-right: 5px;
+    }
+    textarea, input {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+    }
+    button {
+      background: #e67e22;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #d35400;
+    }
+    #search {
+      margin: 20px 0;
+      padding: 10px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+    <h1>Review-dish</h1>
+    <header></header>  
+
+  <form id="reviewForm">
+    <label>ชื่อ:</label>
+    <input type="text" id="name" required />
+
+    <label>รีวิว:</label>
+    <textarea id="review" rows="4" required></textarea>
+
+    <label>เพิ่มรูปภาพ (JPEG/PNG):</label>
+    <input type="file" id="imageUpload" accept="image/png, image/jpeg" />
+
+    <button type="submit">ส่งรีวิว</button>
+  </form>
+
+  <input type="text" id="search" placeholder="ค้นหาชื่อหรือข้อความในรีวิว..." />
+
+  <h2>รีวิวจากผู้เข้าชม</h2>
+  <div id="reviewsContainer"></div>
+
+  <script>
+    const form = document.getElementById('reviewForm');
+    const reviewsContainer = document.getElementById('reviewsContainer');
+    const searchInput = document.getElementById('search');
+    let savedReviews = JSON.parse(localStorage.getItem('reviews')) || [];
+
+    function saveReviews() {
+      localStorage.setItem('reviews', JSON.stringify(savedReviews));
+    }
+
+    function renderReviews(filter = '') {
+      reviewsContainer.innerHTML = '';
+      savedReviews
+        .filter(({ name, review }) => name.toLowerCase().includes(filter) || review.toLowerCase().includes(filter))
+        .forEach((data, index) => addReview(data, index));
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const review = document.getElementById('review').value;
+      const imageInput = document.getElementById('imageUpload');
+      const file = imageInput.files[0];
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function () {
+          const imageUrl = reader.result;
+          savedReviews.unshift({ name, review, image: imageUrl });
+          saveReviews();
+          renderReviews();
+        };
+        reader.readAsDataURL(file);
+      } else {
+        savedReviews.unshift({ name, review, image: null });
+        saveReviews();
+        renderReviews();
+      }
+
+      form.reset();
+    });
+
+    function addReview({ name, review, image }, index) {
+      const reviewDiv = document.createElement('div');
+      reviewDiv.classList.add('review');
+      reviewDiv.innerHTML = `
+        <strong>${name}</strong>
+        <p>${review}</p>
+        ${image ? `<img src="${image}" />` : ''}
+        <button onclick="editReview(${index})">แก้ไข</button>
+        <button onclick="deleteReview(${index})">ลบ</button>
+      `;
+      reviewsContainer.appendChild(reviewDiv);
+    }
+
+    function deleteReview(index) {
+      if (confirm('คุณต้องการลบรีวิวนี้หรือไม่?')) {
+        savedReviews.splice(index, 1);
+        saveReviews();
+        renderReviews(searchInput.value.toLowerCase());
+      }
+    }
+
+    function editReview(index) {
+      const { name, review } = savedReviews[index];
+      document.getElementById('name').value = name;
+      document.getElementById('review').value = review;
+      savedReviews.splice(index, 1);
+      saveReviews();
+      renderReviews(searchInput.value.toLowerCase());
+    }
+
+    searchInput.addEventListener('input', () => {
+      renderReviews(searchInput.value.toLowerCase());
+    });
+
+    renderReviews();
+  </script>
+   <footer class="footer">
+    <div class="container">
+      <div class="row">
+        <div class="footer-col">
+          <h4>Page</h4>
+          <ul>
+            <li><a href="#">about us</a></li>
+            <li><a href="#">our services</a></li>
+            <li><a href="#">privacy policy</a></li>
+            <li><a href="#">affiliate program</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>get help</h4>
+          <ul>
+            <li><a href="#">FAQ</a></li>
+            <li><a href="#">shipping</a></li>
+            <li><a href="#">returns</a></li>
+            <li><a href="#">order status</a></li>
+            <li><a href="#">payment options</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>online shop</h4>
+          <ul>
+            <li><a href="https://www.tiktok.com/@bo0ksm/video/7498024974020562196">watch</a></li>
+            <li><a href="#">bag</a></li>
+            <li><a href="#">shoes</a></li>
+            <li><a href="#">dress</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>follow us</h4>
+         
+            <ul>
+              <li><a href="https://www.facebook.com/FurukuKuro">Facebook</a></li>
+              <li><a href="https://www.instagram.com/l.russ_/">Intagram</a></li>
+              <li><a href="#">Line</a></li>
+              <li><a href="https://www.tiktok.com/@bo0ksm">Tiktok</a></li>
+            </ul>
+          </div>
+        </div>
+</body>
+</html>
